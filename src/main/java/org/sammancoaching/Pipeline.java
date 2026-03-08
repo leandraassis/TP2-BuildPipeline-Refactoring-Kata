@@ -35,7 +35,7 @@ public class Pipeline {
         return false;
     }
 
-    public void emailSummary(boolean testsPassed, boolean deploySuccessful) {
+    private void emailSummary(boolean testsPassed, boolean deploySuccessful) {
         log.info("Sending email");
         if (!testsPassed) {
             emailer.send("Tests failed");
@@ -46,14 +46,17 @@ public class Pipeline {
         }
     }
 
-    public void run(Project project) {
-        boolean testsPassed = testsPassed(project);
-        boolean deploySuccessful = testsPassed && deploySuccessful(project);
-
+    private void sendSummary(boolean testsPassed, boolean deploySuccessful) {
         if (config.sendEmailSummary()) {
             emailSummary(testsPassed, deploySuccessful);
         } else {
             log.info("Email disabled");
         }
+    }
+
+    public void run(Project project) {
+        boolean testsPassed = testsPassed(project);
+        boolean deploySuccessful = testsPassed && deploySuccessful(project);
+        sendSummary(testsPassed, deploySuccessful);
     }
 }
