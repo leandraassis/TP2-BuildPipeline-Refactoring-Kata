@@ -35,20 +35,20 @@ public class Pipeline {
         return false;
     }
 
-    private void emailSummary(boolean testsPassed, boolean deploySuccessful) {
+    private void emailSummary(PipelineResult result) {
         log.info("Sending email");
-        if (!testsPassed) {
+        if (!result.isTestsPassed()) {
             emailer.send("Tests failed");
-        }else if (deploySuccessful) {
+        }else if (result.isDeploySuccesful()) {
             emailer.send("Deployment completed successfully");
         } else {
             emailer.send("Deployment failed");
         }
     }
 
-    private void sendSummary(boolean testsPassed, boolean deploySuccessful) {
+    private void sendSummary(PipelineResult result) {
         if (config.sendEmailSummary()) {
-            emailSummary(testsPassed, deploySuccessful);
+            emailSummary(result);
         } else {
             log.info("Email disabled");
         }
@@ -57,6 +57,7 @@ public class Pipeline {
     public void run(Project project) {
         boolean testsPassed = testsPassed(project);
         boolean deploySuccessful = testsPassed && deploySuccessful(project);
-        sendSummary(testsPassed, deploySuccessful);
+        PipelineResult result = new PipelineResult(testsPassed, deploySuccessful);
+        sendSummary(result);
     }
 }
